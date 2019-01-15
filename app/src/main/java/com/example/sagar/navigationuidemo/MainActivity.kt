@@ -1,9 +1,8 @@
 package com.example.sagar.navigationuidemo
 
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.Navigation
-import androidx.navigation.ui.NavigationUI
 import androidx.navigation.ui.setupWithNavController
 import kotlinx.android.synthetic.main.activity_main.*
 
@@ -13,18 +12,18 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        // Setting keep alvie navigator for avoiding recreated fragment
         val navController = Navigation.findNavController(this, R.id.mainNavFragment)
-
-        // Set up ActionBar
-        setSupportActionBar(toolbar)
-        NavigationUI.setupActionBarWithNavController(this, navController, drawerLayout)
 
         // Set up navigation menu
         navigationView.setupWithNavController(navController)
+
+        // Set up ActionBar
+        setSupportActionBar(toolbar)
+        setupNavController(R.id.mainNavFragment, drawerLayout)
     }
 
     override fun onSupportNavigateUp(): Boolean {
-        return NavigationUI.navigateUp(drawerLayout,
-                Navigation.findNavController(this, R.id.mainNavFragment))
+        return navigateUp(R.id.mainNavFragment, drawerLayout)
     }
 }
