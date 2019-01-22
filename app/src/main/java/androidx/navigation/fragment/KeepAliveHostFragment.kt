@@ -1,20 +1,20 @@
 package androidx.navigation.fragment
 
-import android.content.Context
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.navigation.Navigator
 
 class KeepAliveHostFragment: NavHostFragment() {
 
     @Navigator.Name("fragment")
-    private class InternalKeepAliveNavigator constructor(context: Context,
+    private class InternalKeepAliveNavigator constructor(host: Fragment,
                                                          manager: FragmentManager,
                                                          containerId: Int
-    ) : KeepAliveNavigator(context, manager, containerId) {
+    ) : KeepAliveNavigator(host, manager, containerId) {
         override fun getValidateHostClassName(): String = (KeepAliveHostFragment::class.java).name
     }
 
     override fun createFragmentNavigator(): Navigator<out FragmentNavigator.Destination> {
-        return InternalKeepAliveNavigator(requireContext(), childFragmentManager, id)
+        return InternalKeepAliveNavigator(this, childFragmentManager, id)
     }
 }

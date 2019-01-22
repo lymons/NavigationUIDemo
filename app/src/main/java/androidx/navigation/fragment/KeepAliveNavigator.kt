@@ -1,22 +1,22 @@
 package androidx.navigation.fragment
 
-import android.content.Context
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
+import androidx.navigation.NavOptions
 import androidx.navigation.Navigator
 
 @Navigator.Name("keep_alive_fragment") // `keep_alive_fragment` is used in navigation xml
 open class KeepAliveNavigator(
-        val context: Context,
-        val manager: FragmentManager, // Should pass childFragmentManager.
+        private val host: Fragment,
+        private val manager: FragmentManager, // Should pass childFragmentManager.
         private val containerId: Int
-) : BaseNavigator(context, manager, containerId) {
+) : BaseNavigator(host, manager, containerId) {
 
     override fun getValidateHostClassName(): String = (HybridHostFragment::class.java).name
 
-    override fun handleFragment(transaction: FragmentTransaction, destination: Destination, args: Bundle?): Fragment {
+    override fun showDestination(transaction: FragmentTransaction, destination: Destination, args: Bundle?): Fragment {
         val tag = destination.id.toString()
         val currentFragment = manager.primaryNavigationFragment
         if (currentFragment != null) {
@@ -29,7 +29,7 @@ open class KeepAliveNavigator(
 
         var fragment = manager.findFragmentByTag(tag)
         if (fragment == null) {
-            fragment = instantiateFragment(context, manager, getDestinationClassName(destination), args)
+            fragment = instantiateFragment(host.requireContext(), manager, getDestinationClassName(destination), args)
             fragment.arguments = args
             setKeepAliveFlag(fragment)
 
@@ -40,6 +40,17 @@ open class KeepAliveNavigator(
 
         return fragment
     }
+
+    override fun handleBackStack(transaction: FragmentTransaction, destination: Destination, navOptions: NavOptions?): Boolean {
+        if (mBackStack.peekLast() != destination.id) {
+            transaction.addToBackStack(Integer.toString(destination.id))
+            mIsPendingBackStackOperation = true
+            return true
+        }
+        return false
+    }
+
+    override fun isKeepAliveNavigator() = true
 
     override fun onRestoreState(savedState: Bundle?) {
         super.onRestoreState(savedState)

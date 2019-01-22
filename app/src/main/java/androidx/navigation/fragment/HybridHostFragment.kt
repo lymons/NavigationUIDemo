@@ -13,7 +13,7 @@ class HybridHostFragment: NavHostFragment() {
     private var mNewGraphId: Int? = null
 
     override fun createFragmentNavigator(): Navigator<out FragmentNavigator.Destination> {
-        return HybridNavigator(requireContext(), childFragmentManager, id)
+        return HybridNavigator(this, childFragmentManager, id)
     }
 
     override fun onInflate(context: Context, attrs: AttributeSet, savedInstanceState: Bundle?) {
@@ -33,7 +33,7 @@ class HybridHostFragment: NavHostFragment() {
         super.onCreate(savedInstanceState)
 
         mNewGraphId?.let {
-            val navigator = KeepAliveNavigator(requireContext(), childFragmentManager, id)
+            val navigator = KeepAliveNavigator(this, childFragmentManager, id)
             navController.navigatorProvider += navigator
             navController.setGraph(it)
         }

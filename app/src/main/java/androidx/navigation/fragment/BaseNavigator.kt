@@ -1,11 +1,9 @@
 package androidx.navigation.fragment
 
-import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import androidx.annotation.IdRes
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
 import androidx.navigation.NavDestination
@@ -13,22 +11,19 @@ import androidx.navigation.NavOptions
 import androidx.navigation.Navigator
 
 abstract class BaseNavigator(
-        private val context: Context,
+        private val hostFragment: Fragment,
         private val manager: FragmentManager,
         containerId: Int
-) : FragmentNavigator(context, manager, containerId) {
+) : FragmentNavigator(hostFragment.requireContext(), manager, containerId) {
 
     private val keepAliveSet = HashSet<String>()
 
     init {
-        if (context is FragmentActivity) {
-            val fragment = context.supportFragmentManager.findFragmentById(containerId)!!
-            @Suppress("LeakingThis")
-            val validateName = getValidateHostClassName()
-            assert(validateName == fragment.javaClass.name) {
-                val className = javaClass.simpleName
-                Log.e(className, "$className must be use with $validateName.")
-            }
+        @Suppress("LeakingThis")
+        val validateName = getValidateHostClassName()
+        assert(validateName == hostFragment.javaClass.name) {
+            val className = javaClass.simpleName
+            Log.e(className, "$className must be use with $validateName.")
         }
     }
 
@@ -61,10 +56,34 @@ abstract class BaseNavigator(
             transaction.setCustomAnimations(enterAnim, exitAnim, popEnterAnim, popExitAnim)
         }
 
-        val fragment = handleFragment(transaction, destination, args)
+        val fragment = showDestination(transaction, destination, args)
         transaction.setPrimaryNavigationFragment(fragment)
-        transaction.setReorderingAllowed(true)
 
+        val isAdded = handleBackStack(transaction, destination, navOptions)
+
+        if (navigatorExtras is Extras) {
+            for ((key, value) in navigatorExtras.sharedElements) {
+                transaction.addSharedElement(key, value)
+            }
+        }
+
+        transaction.setReorderingAllowed(true)
+        transaction.commit()
+
+        // The commit succeeded, update our view of the world
+        if (isAdded) {
+            mBackStack.add(destination.id)
+            return destination
+        }
+        return null
+    }
+
+    /**
+     * Default is put fragment into backStack when navigation happened.
+     * Return value:
+     *     true if record this navigation.
+     */
+    protected open fun handleBackStack(transaction: FragmentTransaction, destination: Destination, navOptions: NavOptions?): Boolean {
         val isAdded: Boolean
         @IdRes val destId = destination.id
         val initialNavigation = mBackStack.isEmpty()
@@ -94,26 +113,16 @@ abstract class BaseNavigator(
                 isAdded = true
             }
         }
-        if (navigatorExtras is Extras) {
-            for ((key, value) in navigatorExtras.sharedElements) {
-                transaction.addSharedElement(key, value)
-            }
-        }
 
-        transaction.commit()
-
-        // The commit succeeded, update our view of the world
-        if (isAdded) {
-            mBackStack.add(destId)
-            return destination
-        }
-        return null
+        return isAdded
     }
+
+    protected open fun isKeepAliveNavigator() = false
 
     fun getDestinationClassName(destination: Destination): String {
         var className = destination.className
         if (className[0] == '.') {
-            className = context.packageName + className
+            className = hostFragment.requireContext().packageName + className
         }
 
         return className
@@ -127,7 +136,13 @@ abstract class BaseNavigator(
 
     fun setKeepAliveFlag(fragment: Fragment) = keepAliveSet.add(fragment.javaClass.name)
 
-    protected abstract fun handleFragment(transaction: FragmentTransaction, destination: Destination, args: Bundle?): Fragment
+    /**
+     * Show specified fragment by destination.
+     * Return value:
+     *          True this fragment be created because of no exists.
+     *          False this fragment exists.
+     */
+    protected abstract fun showDestination(transaction: FragmentTransaction, destination: Destination, args: Bundle?): Fragment
 
     protected abstract fun getValidateHostClassName(): String
 }

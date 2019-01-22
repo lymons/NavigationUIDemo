@@ -10,7 +10,7 @@ import androidx.fragment.app.Fragment
 /**
  * A simple [Fragment] subclass.
  */
-class BottomNavFragmentThree : Fragment() {
+class BottomNavFragmentThree : VerboseFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {

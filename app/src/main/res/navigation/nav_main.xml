@@ -5,13 +5,13 @@
     android:id="@+id/nav_main"
     app:startDestination="@id/bottomNavFragment">
 
-    <keep_alive_fragment
+    <fragment
         android:id="@+id/bottomNavFragment"
         android:name="com.example.sagar.navigationuidemo.BottomNavFragment"
         android:label="Home"
         tools:layout="@layout/fragment_bottom_nav" />
 
-    <keep_alive_fragment
+    <fragment
         android:id="@+id/infoFragment"
         android:name="com.example.sagar.navigationuidemo.InfoFragment"
         android:label="Info"
