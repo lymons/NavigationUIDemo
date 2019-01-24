@@ -5,6 +5,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
 import androidx.navigation.NavOptions
+import androidx.navigation.Navigation
 import androidx.navigation.Navigator
 
 @Navigator.Name("keep_alive_fragment") // `keep_alive_fragment` is used in navigation xml
@@ -56,9 +57,12 @@ open class KeepAliveNavigator(
         super.onRestoreState(savedState)
 
         savedState?.let {
+            val activity = host.requireActivity()
+            val navController = Navigation.findNavController(activity, containerId)
+            val top = navController.currentDestination
             val transaction = manager.beginTransaction()
             mBackStack.forEach { tag ->
-                if (tag != mBackStack.peek()) {
+                if (tag != top!!.id) {
                     val fragment = manager.findFragmentByTag(it.toString())
                     if (fragment != null && isKeepAliveFragment(fragment)) {
                         transaction.hide(fragment)
