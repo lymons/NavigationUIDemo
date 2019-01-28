@@ -21,7 +21,7 @@ open class KeepAliveNavigator(
         val tag = destination.id.toString()
         val currentFragment = manager.primaryNavigationFragment
         if (currentFragment != null) {
-            if (isKeepAliveFragment(currentFragment)) {
+            if (isContains(currentFragment)) {
                 transaction.hide(currentFragment)
             } else {
                 transaction.remove(currentFragment)
@@ -32,7 +32,7 @@ open class KeepAliveNavigator(
         if (fragment == null) {
             fragment = instantiateFragment(host.requireContext(), manager, getDestinationClassName(destination), args)
             fragment.arguments = args
-            setKeepAliveFlag(fragment)
+            store(fragment)
 
             transaction.add(containerId, fragment, tag)
         } else {
@@ -64,7 +64,7 @@ open class KeepAliveNavigator(
             mBackStack.forEach { tag ->
                 if (tag != top!!.id) {
                     val fragment = manager.findFragmentByTag(it.toString())
-                    if (fragment != null && isKeepAliveFragment(fragment)) {
+                    if (fragment != null && isContains(fragment)) {
                         transaction.hide(fragment)
                     }
                 }

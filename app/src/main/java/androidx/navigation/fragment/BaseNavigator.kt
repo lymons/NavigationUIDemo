@@ -16,9 +16,11 @@ abstract class BaseNavigator(
         containerId: Int
 ) : FragmentNavigator(hostFragment.requireContext(), manager, containerId) {
 
-    private val keepAliveSet = HashSet<String>()
+    private val fragMap = HashMap<String, Int>()
 
     init {
+        assert(hostFragment is NavHostFragment)
+
         @Suppress("LeakingThis")
         val validateName = getValidateHostClassName()
         assert(validateName == hostFragment.javaClass.name) {
@@ -132,9 +134,9 @@ abstract class BaseNavigator(
      * Judge this fragment being keep alive in current Navigator.
      *  *** Attention: this fragment may be not a keep alive mode in other Navigator.
      */
-    public fun isKeepAliveFragment(fragment: Fragment): Boolean = keepAliveSet.contains(fragment.javaClass.name)
+    fun isContains(fragment: Fragment): Boolean = fragMap[fragment.javaClass.name] == fragment.hashCode()
 
-    fun setKeepAliveFlag(fragment: Fragment) = keepAliveSet.add(fragment.javaClass.name)
+    fun store(fragment: Fragment) = fragMap.put(fragment.javaClass.name, fragment.hashCode())
 
     /**
      * Show specified fragment by destination.

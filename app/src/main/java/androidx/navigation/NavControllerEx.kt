@@ -2,8 +2,8 @@ package androidx.navigation
 
 import androidx.annotation.IdRes
 import androidx.appcompat.app.AppCompatActivity
-import androidx.navigation.fragment.ContainerHostFragment
-import androidx.navigation.fragment.FragmentNavigator
+import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.*
 
 fun NavController.popBackStackContainer(host: ContainerHostFragment): Boolean {
     if (mBackStack.size < 2) {
@@ -44,4 +44,23 @@ fun NavController.popBackStackContainer(@IdRes containerId: Int): Boolean {
         }
     }
     return false
+}
+
+fun Fragment.findNavigator(): FragmentNavigator? {
+    val navController = findNavController()
+    val navigators = navController.navigatorProvider.navigators.map {
+        it.value
+    }.filter {
+        it is BaseNavigator
+    }.map {
+        it as BaseNavigator
+    }.filter {
+        it.isContains(this)
+    }
+    return if (navigators.isNotEmpty()) navigators.first() else null
+}
+
+fun Fragment.isKeepAlive(): Boolean {
+    val navigator = findNavigator()
+    return navigator is KeepAliveNavigator
 }

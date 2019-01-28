@@ -53,7 +53,7 @@
                 app:enterAnim="@anim/slide_in_right"
                 app:exitAnim="@anim/slide_out_left"/>
     </fragment>
-    <fragment
+    <keep_alive_fragment
             android:id="@+id/leaderboard"
             android:name="com.example.sagar.navigationuidemo.game.Leaderboard"
             android:label="fragment_leaderboard"
@@ -65,7 +65,7 @@
                 app:popExitAnim="@anim/slide_out_right"
                 app:enterAnim="@anim/slide_in_right"
                 app:exitAnim="@anim/slide_out_left"/>
-    </fragment>
+    </keep_alive_fragment>
     <fragment
             android:id="@+id/match"
             android:name="com.example.sagar.navigationuidemo.game.Match"

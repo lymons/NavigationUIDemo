@@ -12,6 +12,6 @@
     <item
         android:id="@+id/bottomNavFragmentThree"
         android:icon="@drawable/ic_exposure_plus_2_black_24dp"
-        android:title="@string/screen_bottom_nav_title"/>
+        android:title="@string/game_bottom_nav_title"/>
 
 </menu>

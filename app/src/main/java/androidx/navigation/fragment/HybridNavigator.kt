@@ -5,6 +5,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
 import androidx.navigation.Navigator
+import androidx.navigation.isKeepAlive
 
 @Navigator.Name("fragment")
 class HybridNavigator(
@@ -18,10 +19,11 @@ class HybridNavigator(
 
         val fragment = instantiateFragment(host.requireContext(), manager, getDestinationClassName(destination), args)
         fragment.arguments = args
+        store(fragment)
 
         val currentFragment = manager.primaryNavigationFragment
         if (currentFragment != null) {
-            if (isKeepAliveFragment(currentFragment)) {
+            if (currentFragment.isKeepAlive()) {
                 transaction.hide(currentFragment)
                 transaction.add(containerId, fragment, tag)
             } else {
