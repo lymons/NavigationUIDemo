@@ -43,9 +43,10 @@ open class KeepAliveNavigator(
     }
 
     override fun handleBackStack(transaction: FragmentTransaction, destination: Destination, navOptions: NavOptions?): Boolean {
-        if (mBackStack.peekLast() != destination.id) {
+        val hybridFragment = host as HybridHostFragment
+        if (hybridFragment.navController.currentDestination?.id != destination.id) {
             transaction.addToBackStack(Integer.toString(destination.id))
-            mIsPendingBackStackOperation = true
+            hybridFragment.setPendingOperation(true)
             return true
         }
         return false

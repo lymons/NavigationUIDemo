@@ -1,8 +1,10 @@
 package androidx.navigation
 
 import androidx.annotation.IdRes
+import androidx.annotation.NonNull
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.navigation.fragment.*
 
 fun NavController.popBackStackContainer(host: ContainerHostFragment): Boolean {
@@ -44,6 +46,92 @@ fun NavController.popBackStackContainer(@IdRes containerId: Int): Boolean {
         }
     }
     return false
+}
+
+/**
+ * Porting from mOnBackPressListener of NavController
+ */
+fun NavController.onPopBackStack(@NonNull navigator: BaseNavigator) {
+    // Find what destination just got popped
+    var lastFromNavigator: NavDestination? = null
+    val iterator = mBackStack.descendingIterator()
+    while (iterator.hasNext()) {
+        val destination = iterator.next().destination
+        val currentNavigator = navigatorProvider.getNavigator<BaseNavigator>(destination.navigatorName)
+        if (currentNavigator == navigator) {
+            lastFromNavigator = destination
+            break
+        }
+    }
+    if (lastFromNavigator == null) {
+        return
+    }
+    // Pop all intervening destinations from other Navigators off the
+    // back stack
+    popBackStackInternal(lastFromNavigator.id, false)
+    dispatchOnDestinationChanged()
+}
+
+fun NavController.onBackStackChanged(fragmentManager: FragmentManager, pending: Boolean): Boolean {
+    // If we have pending operations made by us then consume this change, otherwise
+    // detect a pop in the back stack to dispatch callback.
+    if (pending) {
+        return !isBackStackEqual(fragmentManager)
+    }
+
+    // The initial Fragment and NavGraph won't be on the back stack, so the
+    // real count of destinations is the back stack entry count + 2
+    val newCount = fragmentManager.backStackEntryCount + 2
+    if (newCount < mBackStack.size) {
+        // Handle cases where the user hit the system back button
+        while (mBackStack.size > newCount) {
+            mBackStack.removeLast()
+        }
+
+        val navigator = getCurrentFragmentNavigator() as? BaseNavigator ?: return pending
+        onPopBackStack(navigator)
+    }
+
+    return pending
+}
+
+fun NavController.isDestinationExists(): Boolean {
+    // first item is NavGraph
+    return mBackStack.isNotEmpty() && mBackStack.size > 1
+}
+
+fun NavController.getDestinationCount(): Int {
+    return if (isDestinationExists()) mBackStack.size - 1 else 0
+}
+
+fun NavController.getCurrentFragmentNavigator(): FragmentNavigator {
+    return navigatorProvider.getNavigator(currentDestination!!.navigatorName)
+}
+
+/**
+ * Porting from isBackStackEqual of FragmentNavigator
+ */
+internal fun NavController.isBackStackEqual(fragmentManager: FragmentManager): Boolean {
+    val fragmentBackStackCount = fragmentManager.backStackEntryCount
+    // Initial fragment and NavGraph won't be on the FragmentManager's back stack so +2 its count.
+    if (mBackStack.size != fragmentBackStackCount + 2) {
+        return false
+    }
+
+    // From top to bottom verify destination ids match in both back stacks/
+    val backStackIterator = mBackStack.descendingIterator()
+    var fragmentBackStackIndex = fragmentBackStackCount - 1
+    while (backStackIterator.hasNext() && fragmentBackStackIndex >= 0) {
+        val destId = backStackIterator.next().destination.id
+        val fragmentDestId = fragmentManager
+                .getBackStackEntryAt(fragmentBackStackIndex--)
+                .name
+        if (fragmentDestId != null && destId != fragmentDestId.toInt()) {
+            return false
+        }
+    }
+
+    return true
 }
 
 fun Fragment.findNavigator(): FragmentNavigator? {

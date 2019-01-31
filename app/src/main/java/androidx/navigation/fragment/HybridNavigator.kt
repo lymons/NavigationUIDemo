@@ -36,5 +36,9 @@ class HybridNavigator(
         return fragment
     }
 
+    override fun setPendingOperation(pending: Boolean) {
+        (host as HybridHostFragment).setPendingOperation(pending)
+    }
+
     override fun getValidateHostClassName(): String = (HybridHostFragment::class.java).name
 }

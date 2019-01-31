@@ -6,9 +6,7 @@ import androidx.annotation.IdRes
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
-import androidx.navigation.NavDestination
-import androidx.navigation.NavOptions
-import androidx.navigation.Navigator
+import androidx.navigation.*
 
 abstract class BaseNavigator(
         private val hostFragment: Fragment,
@@ -27,6 +25,14 @@ abstract class BaseNavigator(
             val className = javaClass.simpleName
             Log.e(className, "$className must be use with $validateName.")
         }
+    }
+
+    protected open fun setPendingOperation(pending: Boolean) {
+        mIsPendingBackStackOperation = pending
+    }
+
+    fun removeBackStackListener() {
+        onBackPressRemoved()
     }
 
     /**
@@ -74,7 +80,6 @@ abstract class BaseNavigator(
 
         // The commit succeeded, update our view of the world
         if (isAdded) {
-            mBackStack.add(destination.id)
             return destination
         }
         return null
@@ -88,30 +93,32 @@ abstract class BaseNavigator(
     protected open fun handleBackStack(transaction: FragmentTransaction, destination: Destination, navOptions: NavOptions?): Boolean {
         val isAdded: Boolean
         @IdRes val destId = destination.id
-        val initialNavigation = mBackStack.isEmpty()
+        val navHostFragment = hostFragment as NavHostFragment
+        val initialNavigation = !navHostFragment.navController.isDestinationExists()
+        val currentDestination = navHostFragment.navController.currentDestination
         // TODO Build first class singleTop behavior for fragments
         val isSingleTopReplacement = (navOptions != null && !initialNavigation
                 && navOptions.shouldLaunchSingleTop()
-                && mBackStack.peekLast() == destId)
+                && currentDestination?.id == destId)
 
         when {
             initialNavigation -> isAdded = true
             isSingleTopReplacement -> {
                 // Single Top means we only want one instance on the back stack
-                if (mBackStack.size > 1) {
+                if (navHostFragment.navController.getDestinationCount() > 1) {
                     // If the Fragment to be replaced is on the FragmentManager's
                     // back stack, a simple replace() isn't enough so we
                     // remove it from the back stack and put our replacement
                     // on the back stack in its place
                     manager.popBackStack()
                     transaction.addToBackStack(Integer.toString(destId))
-                    mIsPendingBackStackOperation = true
+                    setPendingOperation(true)
                 }
                 isAdded = false
             }
             else -> {
                 transaction.addToBackStack(Integer.toString(destId))
-                mIsPendingBackStackOperation = true
+                setPendingOperation(true)
                 isAdded = true
             }
         }
