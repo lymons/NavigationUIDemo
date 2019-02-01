@@ -4,9 +4,9 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
-import androidx.navigation.popBackStackContainer
+import androidx.navigation.navigateBack
 import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.setupWithNavController
+import androidx.navigation.ui.setupKeepAliveNavController
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
@@ -22,7 +22,7 @@ class MainActivity : AppCompatActivity() {
         navController = Navigation.findNavController(this, R.id.mainNavFragment)
 
         // Set up navigation menu
-        navigationView.setupWithNavController(navController)
+        navigationView.setupKeepAliveNavController(navController)
 
         appBarConfiguration = AppBarConfiguration(
                 setOf(R.id.bottomNavFragment, R.id.infoFragment),
@@ -38,7 +38,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun finishAfterTransition() {
-        if (!navController.popBackStackContainer(R.id.mainNavFragment)) {
+        if (!navController.navigateBack(R.id.mainNavFragment)) {
             super.finishAfterTransition()
         }
     }

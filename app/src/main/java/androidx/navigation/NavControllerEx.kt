@@ -7,7 +7,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.navigation.fragment.*
 
-fun NavController.popBackStackContainer(host: ContainerHostFragment): Boolean {
+fun NavController.navigateBack(host: ContainerHostFragment): Boolean {
     if (mBackStack.size < 2) {
         return false
     }
@@ -38,7 +38,14 @@ fun NavController.popBackStackContainer(host: ContainerHostFragment): Boolean {
     return true
 }
 
-fun NavController.popBackStackContainer(@IdRes containerId: Int): Boolean {
+/**
+ * When navigation is ContainerHostFragment, use this method to
+ * back to previous container fragment if back key pressed.
+ *
+ * This method will be find a top-level container recursively,
+ * if the container is ContainerHostFragment then hide it.
+ */
+fun NavController.navigateBack(@IdRes containerId: Int): Boolean {
     if (mContext is AppCompatActivity) {
         val container = (mContext as AppCompatActivity).supportFragmentManager.findFragmentById(containerId)
         if (container is ContainerHostFragment) {

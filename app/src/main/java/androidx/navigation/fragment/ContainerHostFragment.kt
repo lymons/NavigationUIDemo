@@ -40,7 +40,7 @@ class ContainerHostFragment: NavHostFragment() {
             }
         }
 
-        return if (resumed) resumed else navController.popBackStackContainer(this)
+        return if (resumed) resumed else navController.navigateBack(this)
     }
 
     fun instantiateFragment(provider: NavigatorProvider, destination: FragmentNavigator.Destination, args: Bundle?): Fragment {
