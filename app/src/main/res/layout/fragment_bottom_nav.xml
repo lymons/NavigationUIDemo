@@ -20,8 +20,8 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         android:background="@color/colorPrimary"
-        app:itemIconTint="@color/white"
-        app:itemTextColor="@color/white"
+        app:itemIconTint="@color/color_tab_tint"
+        app:itemTextColor="@color/color_tab_tint"
         app:menu="@menu/bottom_navigation_menu" />
 
 </FrameLayout>
