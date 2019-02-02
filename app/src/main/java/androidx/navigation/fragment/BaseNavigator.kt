@@ -48,7 +48,13 @@ abstract class BaseNavigator(
         val transaction = manager.beginTransaction()
 
         if (manager.isStateSaved) {
-            Log.i("KeepAliveNavigator", "Ignoring navigate() call: FragmentManager has already" + " saved its state")
+            Log.i("BaseNavigator", "Ignoring navigate() call: FragmentManager has already" + " saved its state")
+            return null
+        }
+
+        val currentFragment = manager.primaryNavigationFragment
+        if (currentFragment != null && destination.className == currentFragment.javaClass.name) {
+            Log.i("BaseNavigator", "Ignoring navigate() call: Destination is same to current fragment(${destination.className})")
             return null
         }
 
