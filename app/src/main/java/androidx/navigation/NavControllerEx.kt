@@ -111,6 +111,14 @@ fun NavController.getDestinationCount(): Int {
     return if (isDestinationExists()) mBackStack.size - 1 else 0
 }
 
+fun NavController.getDestinations(): List<Int> {
+    return mBackStack.filter {
+        it.destination is FragmentNavigator.Destination
+    }.map {
+        it.destination.id
+    }
+}
+
 fun NavController.getCurrentFragmentNavigator(): FragmentNavigator {
     return navigatorProvider.getNavigator(currentDestination!!.navigatorName)
 }

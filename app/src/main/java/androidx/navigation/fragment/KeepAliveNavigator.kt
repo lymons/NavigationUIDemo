@@ -7,6 +7,7 @@ import androidx.fragment.app.FragmentTransaction
 import androidx.navigation.NavOptions
 import androidx.navigation.Navigation
 import androidx.navigation.Navigator
+import androidx.navigation.getDestinations
 
 @Navigator.Name("keep_alive_fragment") // `keep_alive_fragment` is used in navigation xml
 open class KeepAliveNavigator(
@@ -62,7 +63,7 @@ open class KeepAliveNavigator(
             val navController = Navigation.findNavController(activity, containerId)
             val top = navController.currentDestination
             val transaction = manager.beginTransaction()
-            mBackStack.forEach { tag ->
+            navController.getDestinations().forEach { tag ->
                 if (tag != top!!.id) {
                     val fragment = manager.findFragmentByTag(it.toString())
                     if (fragment != null && isContains(fragment)) {
