@@ -35,6 +35,8 @@ fun NavController.navigateBack(host: ContainerHostFragment): Boolean {
     transaction.setReorderingAllowed(true)
     transaction.commit()
 
+    dispatchOnDestinationChanged()
+
     return true
 }
 
