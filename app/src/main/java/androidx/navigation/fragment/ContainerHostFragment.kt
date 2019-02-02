@@ -33,14 +33,29 @@ class ContainerHostFragment: NavHostFragment() {
         }
 
         var resumed = false
+        var needBack = true
         if (tops != null && tops.isNotEmpty()) {
             if (tops[0] is ContainerHostFragment) {
+                needBack = false
                 val host = tops[0] as ContainerHostFragment
                 resumed = host.popBackStack()
+            } else {
+                val multiChildThirdLevel = fragment.childFragmentManager.backStackEntryCount > 0
+                val multiChildFourthLevel = tops[0].childFragmentManager.backStackEntryCount > 0
+                if (multiChildThirdLevel || multiChildFourthLevel) {
+                    needBack = false
+                }
             }
         }
 
-        return if (resumed) resumed else navController.navigateBack(this)
+        /**
+         * When no others need to handle backStack, then do navigate back for container.
+         */
+        if (needBack) {
+            return navController.navigateBack(this)
+        }
+
+        return resumed
     }
 
     fun instantiateFragment(provider: NavigatorProvider, destination: FragmentNavigator.Destination, args: Bundle?): Fragment {

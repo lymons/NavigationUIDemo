@@ -37,9 +37,9 @@ class MainActivity : AppCompatActivity() {
         return navigateUp(R.id.mainNavFragment, appBarConfiguration)
     }
 
-    override fun finishAfterTransition() {
+    override fun onBackPressed() {
         if (!navController.navigateBack(R.id.mainNavFragment)) {
-            super.finishAfterTransition()
+            super.onBackPressed()
         }
     }
 }
