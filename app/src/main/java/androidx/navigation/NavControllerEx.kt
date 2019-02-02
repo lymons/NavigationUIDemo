@@ -45,7 +45,7 @@ fun NavController.navigateBack(host: ContainerHostFragment): Boolean {
  * back to previous container fragment if back key pressed.
  *
  * This method will be find a top-level container recursively,
- * if the container is ContainerHostFragment then hide it.
+ * if the container is ContainerHostFragment then hide top fragment in it.
  */
 fun NavController.navigateBack(@IdRes containerId: Int): Boolean {
     if (mContext is AppCompatActivity) {

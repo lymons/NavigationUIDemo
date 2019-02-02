@@ -8,6 +8,9 @@ import androidx.navigation.*
 
 class ContainerHostFragment: NavHostFragment() {
 
+    private var mIsHandleBackPressed = true
+
+
     @Navigator.Name("fragment")
     private class ContainerKeepAliveNavigator constructor(host: Fragment,
                                                          manager: FragmentManager,
@@ -24,6 +27,10 @@ class ContainerHostFragment: NavHostFragment() {
 
     override fun createFragmentNavigator(): Navigator<out FragmentNavigator.Destination> {
         return ContainerKeepAliveNavigator(this, childFragmentManager, id)
+    }
+
+    fun skipBackPressed() {
+        mIsHandleBackPressed = false
     }
 
     fun popBackStack(): Boolean {
@@ -51,7 +58,7 @@ class ContainerHostFragment: NavHostFragment() {
         /**
          * When no others need to handle backStack, then do navigate back for container.
          */
-        if (needBack) {
+        if (needBack && mIsHandleBackPressed) {
             return navController.navigateBack(this)
         }
 
